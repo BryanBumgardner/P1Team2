@@ -1,0 +1,47 @@
+#Challenge 4
+%matplotlib inline
+import matplotlib.pyplot as plt
+import csv
+import pandas as pd
+import numpy as np
+from pandas import DataFrame, Series
+import pprint
+import datetime
+
+data = pd.read_csv("turnshort.csv", header=0)
+
+
+data['key'] = list(zip(data["C/A"], data['UNIT'], data['SCP'], data['STATION']))
+#print(list(zip(data["C/A"], data['UNIT'], data['SCP'], data['STATION'])))
+data_dict = {}
+
+data['datetime'] = pd.to_datetime(data.DATE + data.TIME, format='%m/%d/%Y%H:%M:%S')
+datetime_dict = {}
+
+for index, row in data.iterrows():
+	value = row['datetime'], row['ENTRIES']
+	key = row['key']
+
+	if key in datetime_dict:
+		datetime_dict[key].append(value)
+
+	else:
+		datetime_dict[key] = [value]
+
+def CountEachDay(my_list):
+	dates = [row[0].date() for row in my_list]
+	dates = set(dates)
+
+	result = []
+	for date in dates:
+		entries = [x[1] for x in my_list if x[0].date () == date]
+		result.append((date, max(entries)-min(entries)))
+
+	return result
+
+count_dict = {key:CountEachDay(datetime_dict[key]) for key in datetime_dict}
+#pprint.pprint(count_dict, width = 100)
+#.to_list()
+DEL = pd.DataFrame.from_dict(count_dict, orient='index')
+NewEntryDateList = DEL['0','1']
+pprint.pprint(DEL)
